@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="usersign">
+
+    <select id="getUserByUserId" resultType="com.spring_tutorial.board.model.dto.UserDto">
+        SELECT user_id AS userId,
+        user_pw AS userPw,
+        user_name AS userName,
+        login_fail_count AS loginFailCount,
+        lock_until AS lockUntil
+        FROM tbl_user
+        WHERE user_id = #{userId}
+    </select>
+
+    <update id="incrementLoginFailCount">
+        UPDATE tbl_user
+        SET login_fail_count = login_fail_count + 1
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="resetLoginFailCount">
+        UPDATE tbl_user
+        SET login_fail_count = 0
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="lockUser">
+        UPDATE tbl_user
+        SET lock_until = #{lockUntil}
+        WHERE user_id = #{userId}
+    </update>
+
+    <select id="getUserName" resultType="String">
+        SELECT user_name
+        FROM tbl_user
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>

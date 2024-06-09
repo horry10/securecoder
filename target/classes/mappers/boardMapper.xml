@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="board">
+	
+	<!-- 게시글 전체 목록 조회 -->
+	<select id="listAll" resultType="com.spring_tutorial.board.model.dto.BoardDto">
+		SELECT *, (total+ 1 - rownum) AS rownuma
+		FROM (
+		SELECT
+		@rownum := @rownum + 1 AS rownum,(SELECT COUNT(*) FROM tbl_board) AS total,
+		bno,
+		title,
+		content,
+		writer,
+		regDate,
+		viewCnt
+		FROM
+		tbl_board,
+		(SELECT @rownum := 0) AS r
+		<include refid="search" />
+		ORDER BY
+		bno DESC,
+		regDate DESC
+		) AS a
+		WHERE rownum BETWEEN #{start} AND #{end}
+	</select>
+
+
+	<sql id="search">
+		<where>
+			<if test="searchOption != null and searchOption != '' and keyword != null and keyword != ''">
+				<choose>
+					<!-- 검색 옵션이 전체 검색일 경우 -->
+					<when test="searchOption == 'all'">
+						AND (writer LIKE CONCAT('%', #{keyword}, '%')
+						OR content LIKE CONCAT('%', #{keyword}, '%')
+						OR title LIKE CONCAT('%', #{keyword}, '%'))
+					</when>
+					<!-- 특정 검색 옵션인 경우 -->
+					<otherwise>
+						AND ${searchOption} LIKE CONCAT('%', #{keyword}, '%')
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+	</sql>
+
+
+
+	
+	<!-- 게시글 레코드 개수 -->
+	<select id="countArticle" resultType="int">
+		SELECT COUNT(*)
+		FROM tbl_board
+		<include refid="search"></include>
+	</select>
+	
+
+	
+	<!-- 게시글 작성 -->
+	<insert id="create">
+		INSERT INTO tbl_board (
+			title,
+			content,
+			writer
+		)
+		VALUES (
+			#{title},
+			#{content},
+			#{writer}
+		)
+	</insert>
+	
+	<!-- 게시글 상세 페이지 -->
+	<select id="detail" resultType="com.spring_tutorial.board.model.dto.BoardDto" >
+		SELECT 
+			bno,
+			title,
+			content,
+			writer,
+			regDate,
+			viewCnt
+		FROM tbl_board
+		WHERE bno = #{bno}
+	</select>
+	
+	<!-- 게시글 수정 -->
+	<update id="update">
+		UPDATE tbl_board
+		SET
+		title = #{title},
+		content = #{content},
+		writer = #{writer}
+		WHERE
+		bno = #{bno}
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<delete id="delete">
+		DELETE FROM tbl_board
+		WHERE bno = #{bno}
+	</delete>
+	
+	<!-- 사용자가 게시글을 조회했는지 검사 -->
+	<select id="checkViews" resultType="String">
+		SELECT user_id
+		FROM board_views
+		WHERE board_id = #{boardId} AND user_id = #{userId}
+	</select>
+	
+	<!-- 게시글 조회수 증가 -->
+	<update id="updateViews">
+		UPDATE tbl_board
+		SET viewCnt = viewCnt + 1
+		WHERE bno = #{bno}
+	</update>
+	
+	<!-- 게시글 조회 테이블에 사용자 추가 -->
+	<insert id="addUserToBoardViews">
+		INSERT INTO board_views(board_id, user_id)
+		VALUES(#{boardId}, #{userId})
+	</insert>
+
+
+	<update id="incrementLoginFailCount">
+		UPDATE tbl_user
+		SET login_fail_count = login_fail_count + 1
+		WHERE user_id = #{userId}
+	</update>
+
+	<update id="resetLoginFailCount">
+		UPDATE tbl_user
+		SET login_fail_count = 0,
+		lock_until = NULL
+		WHERE user_id = #{userId}
+	</update>
+
+	<update id="lockUser">
+		UPDATE tbl_user
+		SET lock_until = #{lockUntil}
+		WHERE user_id = #{userId}
+	</update>
+
+	<select id="getUserByUserId" resultType="com.spring_tutorial.board.model.dto.UserDto">
+		SELECT user_id, user_pw, user_name, login_fail_count, lock_until
+		FROM tbl_user
+		WHERE user_id = #{userId}
+	</select>
+
+
+
+</mapper>
