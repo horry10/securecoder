@@ -3,8 +3,8 @@
 ### 사용한 기술
 
 - Mysql로 데이터베이스에 접속
-- MVC 구조를 따름
-- DAO와 DTO를 활용하여 DB관련 연동 작업 수행
+- MVC 구조
+- DTO를 활용하여 DB관련 연동 작업 수행
 - HttpSession을 통해 사용자에 대한 정보를 저장
 - Pagination 클래스를 생성하여 게시물 페이징
 - Spring-Security로 비밀번호 암호화 
