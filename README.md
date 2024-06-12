@@ -1,10 +1,9 @@
-### 적용된 기능
+### 기능
 
 - Mysql로 데이터베이스에 접속
-- MVC 구조
 - HttpSession을 통해 사용자 세션을 저장
 - Pagination 기능을 추가하여 게시물 페이징
-- Spring-Security로 비밀번호 암호화 
+- Spring Security로 비밀번호 암호화 
 - webfilter로 xss ,csrf 방어
 - 중복로그인 방지
 - 세션을 통해 게시글 인증 수정 삭제 권한 설정
